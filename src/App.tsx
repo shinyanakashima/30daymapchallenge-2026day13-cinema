@@ -86,16 +86,6 @@ export default function App() {
                 </button>
               ))}
             </div>
-            <label className="pref-select">
-              <span>都道府県</span>
-              <select value={selected} onChange={(e) => selectPref(e.target.value)}>
-                {prefList.map((r) => (
-                  <option key={r.prefectureCode} value={r.prefectureCode}>
-                    {r.prefectureCode} {r.prefectureName}
-                  </option>
-                ))}
-              </select>
-            </label>
             <div className="seg" role="radiogroup" aria-label="表示方法">
               <button role="radio" aria-checked={view === "3d"} className={view === "3d" ? "on" : ""} onClick={() => setMode("3d")} disabled={!webgl} title={webgl ? undefined : "この環境では立体表示を使えません"}>
                 立体
@@ -132,7 +122,13 @@ export default function App() {
         <main className="stage">
           {view === "3d" ? (
             <div className="stage3d-wrap">
-              <ViewToggle zoomed={zoomed} onToggle={() => setZoomed((z) => !z)} />
+              <MapDock
+                prefList={prefList}
+                selected={selected}
+                onSelect={selectPref}
+                zoomed={zoomed}
+                onToggle={() => setZoomed((z) => !z)}
+              />
               <Suspense fallback={<p className="loading">立体地図を準備中…</p>}>
                 <CinemaStage
                   geo={geo}
@@ -149,7 +145,13 @@ export default function App() {
             </div>
           ) : (
           <div className={`screens${zoomed ? " is-zoomed" : ""}`}>
-            <ViewToggle zoomed={zoomed} onToggle={() => setZoomed((z) => !z)} />
+            <MapDock
+              prefList={prefList}
+              selected={selected}
+              onSelect={selectPref}
+              zoomed={zoomed}
+              onToggle={() => setZoomed((z) => !z)}
+            />
             {(["cinemaRate", "outsideCinemaRate"] as Indicator[]).map((k) => (
               <figure key={k} className={`screen${mobileInd === k ? " mobile-on" : ""}`}>
                 <figcaption>
@@ -248,10 +250,43 @@ export default function App() {
   );
 }
 
-function ViewToggle({ zoomed, onToggle }: { zoomed: boolean; onToggle: () => void }) {
+// 地図の上に重ねる操作パネル：都道府県の選択（前後送り付き）と全国表示への切替
+function MapDock({
+  prefList,
+  selected,
+  onSelect,
+  zoomed,
+  onToggle,
+}: {
+  prefList: { prefectureCode: string; prefectureName: string }[];
+  selected: string;
+  onSelect: (code: string) => void;
+  zoomed: boolean;
+  onToggle: () => void;
+}) {
+  const i = prefList.findIndex((r) => r.prefectureCode === selected);
+  const step = (d: number) => onSelect(prefList[(i + d + prefList.length) % prefList.length].prefectureCode);
   return (
-    <div className="view-toggle">
-      <button onClick={onToggle} aria-pressed={zoomed}>
+    <div className="map-dock">
+      <div className="pref-picker">
+        <button onClick={() => step(-1)} aria-label="前の都道府県">
+          ‹
+        </button>
+        <label>
+          <span className="sr-only">都道府県</span>
+          <select value={selected} onChange={(e) => onSelect(e.target.value)}>
+            {prefList.map((r) => (
+              <option key={r.prefectureCode} value={r.prefectureCode}>
+                {r.prefectureCode} {r.prefectureName}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button onClick={() => step(1)} aria-label="次の都道府県">
+          ›
+        </button>
+      </div>
+      <button className="dock-zoom" onClick={onToggle} aria-pressed={zoomed}>
         {zoomed ? "全国を見る" : "選択県に寄る"}
       </button>
     </div>

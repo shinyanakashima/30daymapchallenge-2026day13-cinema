@@ -46,9 +46,6 @@ h1, h2 { margin: 0; }
 .seg button.on { background: var(--accent); color: #1b1410; font-weight: 700; }
 .seg-small button { padding: 2px 10px; font-size: 12px; }
 .seg-mobile { display: none; }
-.pref-select { display: inline-flex; gap: 8px; align-items: center; }
-.pref-select span { color: var(--muted); font-size: 13px; }
-.pref-select select { background: var(--bg-2); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; min-width: 9em; }
 
 .loading, .error { text-align: center; padding: 40px 16px; }
 .error { background: #4a1f25; border: 1px solid #a5464f; border-radius: 6px; }
@@ -102,12 +99,34 @@ h1, h2 { margin: 0; }
 .inset-label { font-size: 11px; fill: #8a8490; }
 .inset-box, .inset-label { transition: opacity 0.5s; }
 .is-zoomed-away .inset-box, .is-zoomed-away .inset-label { opacity: 0; }
-.view-toggle { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 3; }
-.view-toggle button {
-  background: #1b1620e6; border: 1px solid #5a4e62; color: var(--text); border-radius: 999px;
-  padding: 4px 16px; font-size: 13px; cursor: pointer; box-shadow: 0 6px 18px -6px #000;
+/* 地図上の操作パネル */
+.map-dock {
+  position: absolute; left: 50%; top: 10px; transform: translateX(-50%); z-index: 4;
+  display: flex; gap: 8px; align-items: center; max-width: calc(100% - 20px);
 }
-.view-toggle button:hover { border-color: var(--accent); }
+.pref-picker {
+  display: flex; align-items: center; background: #120f16eb; border: 1px solid #e8b85c80; border-radius: 999px;
+  box-shadow: 0 8px 24px -8px #000, 0 0 20px -8px #e8b85c66; overflow: hidden;
+}
+.pref-picker button {
+  border: 0; background: transparent; color: var(--accent); font-size: 20px; line-height: 1; padding: 6px 12px; cursor: pointer;
+}
+.pref-picker button:hover { background: #ffffff12; }
+.pref-picker select {
+  border: 0; background: transparent; color: var(--text); font-size: 16px; font-weight: 700; padding: 6px 4px;
+  min-width: 8.5em; text-align: center; cursor: pointer; -webkit-appearance: none; appearance: none; padding-right: 18px;
+}
+.pref-picker label { position: relative; display: flex; }
+.pref-picker label::after { content: "▾"; position: absolute; right: 2px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 12px; pointer-events: none; }
+.pref-picker select option { background: var(--panel); color: var(--text); }
+.dock-zoom {
+  background: #1b1620e6; border: 1px solid #5a4e62; color: var(--text); border-radius: 999px;
+  padding: 6px 14px; font-size: 13px; cursor: pointer; box-shadow: 0 6px 18px -6px #000; white-space: nowrap;
+}
+.dock-zoom:hover { border-color: var(--accent); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+/* 2面表示ではドックを地図の上の行に置く */
+.screens > .map-dock { position: static; transform: none; grid-column: 1 / -1; justify-self: center; max-width: 100%; }
 @media (prefers-reduced-motion: reduce) {
   .map-plane, .pref { transition: none; }
 }
@@ -132,11 +151,10 @@ h1, h2 { margin: 0; }
 .s3-outsideCinemaRate { color: #9cc2ff; }
 .s3-tick { font-size: 10px; color: #a79f93; text-shadow: 0 1px 2px #000; }
 .stage3d-note {
-  position: absolute; left: 10px; top: 8px; margin: 0; max-width: calc(100% - 20px);
+  position: absolute; left: 10px; bottom: 8px; margin: 0; max-width: calc(100% - 20px);
   font-size: 11px; color: var(--muted); background: #07060ab3; padding: 2px 8px; border-radius: 4px; pointer-events: none;
 }
 .stage3d-wrap .loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); }
-.stage3d-wrap .view-toggle { z-index: 4; }
 
 .pillar-legend .pl-row { display: flex; gap: 10px; align-items: center; }
 .pillar-legend svg.pl-fig { width: 96px; height: 52px; flex: 0 0 auto; }
@@ -271,6 +289,7 @@ thead th { color: var(--muted); font-weight: 600; }
   .app { height: 100vh; height: 100dvh; overflow: hidden; }
   .stage { flex: 1 1 auto; min-height: 0; grid-template-columns: minmax(0, 1fr) clamp(300px, 27vw, 380px); }
   .screens, .stage3d-wrap { height: 100%; }
+  .screens { grid-template-rows: auto minmax(0, 1fr); }
   .map-plane { position: absolute; inset: 0; }
   .map-svg { width: 100%; height: 100%; }
   .side { height: 100%; }
