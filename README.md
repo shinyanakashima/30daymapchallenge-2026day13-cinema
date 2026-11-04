@@ -1,8 +1,12 @@
 # 映画を見る、日本を見る。／Watching Movies, Seeing Japan（仮題）
 
-#30DayMapChallenge 2026 Day 5「Senses: Sight」。
+#30DayMapChallenge 2026 Day 13「Interactions」（"Interactions between things, or maybe the result would be an interactive map?"）。
 
-全国47都道府県について、過去1年間に「映画館」「映画館以外」で映画を見た人の割合（行動者率）を、同じ尺度の2枚の地図で並べて比べるWebアプリです。
+公開URL：https://shinyanakashima.github.io/30daymapchallenge-2026day13-cinema/ （英語 `?lang=en`／日本語 `?lang=ja`）
+
+地図・選択リスト・棒グラフのどこで県を選んでも、立体地図のカメラ、チケット風カード、棒グラフが同時に動き、性別を切り替えると柱の高さと全国値との差がそろって更新されます。地図にマウスを乗せるとその場にミニグラフが出るなど、操作に応じて複数の表示が連動するインタラクティブ地図として、Day 13 の「Interactions」に当てはめています。
+
+全国47都道府県について、過去1年間に「映画館」「映画館以外」で映画を見た人の割合（行動者率）を、同じ尺度の2本の柱（立体表示）または2枚の地図（2面表示）で比べるWebアプリです。
 
 - 問い：映画を見る場所は、地域でどう違う？
 - データ：総務省統計局「令和3年社会生活基本調査」調査票A 第93-2表（2021年）

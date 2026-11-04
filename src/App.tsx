@@ -95,7 +95,7 @@ export default function App() {
     <div className="app">
       <header className="topbar">
         <div className="brand">
-          <p className="kicker">#30DayMapChallenge 2026 · Day 5 Senses: Sight</p>
+          <p className="kicker">#30DayMapChallenge 2026 · Day 13 Interactions</p>
           <h1>{t.title}</h1>
         </div>
         <p className="lede">
@@ -237,7 +237,7 @@ export default function App() {
           <button onClick={() => setDialog("table")} disabled={!data}>
             {t.table}
           </button>
-          <a href="https://github.com/shinyanakashima/30daymapchallenge-2026day5-senses-cinema" target="_blank" rel="noreferrer">
+          <a href="https://github.com/shinyanakashima/30daymapchallenge-2026day13-cinema" target="_blank" rel="noreferrer">
             GitHub
           </a>
         </div>
