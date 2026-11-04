@@ -19,19 +19,20 @@ export type Dataset = {
   records: Rec[];
 };
 
-export const SEX_LABEL: Record<Sex, string> = { total: "男女計", male: "男性", female: "女性" };
-export const IND_LABEL: Record<Indicator, string> = { cinemaRate: "映画館", outsideCinemaRate: "映画館以外" };
-export const IND_SUB: Record<Indicator, string> = {
-  cinemaRate: "映画館での映画鑑賞",
-  outsideCinemaRate: "映画館以外での映画鑑賞（テレビ・DVD・パソコンなど）",
-};
 export const NATIONAL = "00";
 // 柱・棒の指標色（暗い背景上で区別しやすい暖色／寒色）
 export const IND_COLOR: Record<Indicator, string> = { cinemaRate: "#f2b84b", outsideCinemaRate: "#7fb0ff" };
 
+// 読み込み失敗（表示文言は画面側で言語に合わせて組み立てる）
+export class LoadError extends Error {
+  constructor(public kind: "stats" | "map", public status: number) {
+    super(`${kind} HTTP ${status}`);
+  }
+}
+
 export async function loadDataset(): Promise<Dataset> {
   const res = await fetch(`${import.meta.env.BASE_URL}data/cinema_2021.json`);
-  if (!res.ok) throw new Error(`統計データを読み込めませんでした（HTTP ${res.status}）`);
+  if (!res.ok) throw new LoadError("stats", res.status);
   return res.json();
 }
 
@@ -45,11 +46,6 @@ export const fmtRate = (v: number | null) => (v == null ? "—" : `${v.toFixed(1
 export function diffPt(a: number | null, b: number | null): number | null {
   if (a == null || b == null) return null;
   return (Math.round(a * 10) - Math.round(b * 10)) / 10;
-}
-export function fmtPt(d: number | null) {
-  if (d == null) return "—";
-  if (d === 0) return "±0.0ポイント";
-  return `${d > 0 ? "+" : "−"}${Math.abs(d).toFixed(1)}ポイント`;
 }
 
 // 0〜100% の共通固定尺度（両地図・凡例・棒グラフで共有）

@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { fmtRate, NATIONAL, IND_COLOR, type Rec } from "../lib/data";
+import { useI18n } from "../lib/i18n";
 
 type SortKey = "code" | "cinemaRate" | "outsideCinemaRate";
 type Props = { rows: Rec[]; nation: Rec | undefined; selected: string; onSelect: (code: string) => void };
 
 // 都道府県ごとに2本の独立した棒（0〜100%の共通軸）。構成比ではない。
 export function BarCompare({ rows, nation, selected, onSelect }: Props) {
+  const { t, prefName } = useI18n();
   const [sort, setSort] = useState<SortKey>("code");
   const sorted = useMemo(() => {
     const prefs = rows.filter((r) => r.prefectureCode !== NATIONAL);
@@ -31,15 +33,9 @@ export function BarCompare({ rows, nation, selected, onSelect }: Props) {
   return (
     <section className="bars" aria-labelledby="bars-title">
       <div className="bars-head">
-        <h2 id="bars-title">47都道府県</h2>
-        <div className="seg seg-small" role="radiogroup" aria-label="並び順（率順は高い順）">
-          {(
-            [
-              ["code", "コード順"],
-              ["cinemaRate", "映画館の率順"],
-              ["outsideCinemaRate", "映画館以外の率順"],
-            ] as [SortKey, string][]
-          ).map(([k, l]) => (
+        <h2 id="bars-title">{t.barsTitle}</h2>
+        <div className="seg seg-small" role="radiogroup" aria-label={t.sortAria}>
+          {(["code", "cinemaRate", "outsideCinemaRate"] as SortKey[]).map((k) => [k, t.sort[k]] as const).map(([k, l]) => (
             <button key={k} role="radio" aria-checked={sort === k} className={sort === k ? "on" : ""} onClick={() => setSort(k)}>
               {l}
             </button>
@@ -47,7 +43,7 @@ export function BarCompare({ rows, nation, selected, onSelect }: Props) {
         </div>
       </div>
       <p className="bars-note">
-        上＝映画館、下＝映画館以外。2本はそれぞれ独立した割合で、足して100%にはなりません。点線は全国値。
+        {t.barsNote}
       </p>
       <div className="bars-axis" aria-hidden="true">
         <span />
@@ -65,10 +61,10 @@ export function BarCompare({ rows, nation, selected, onSelect }: Props) {
             <button
               className={`bar-row${r.prefectureCode === selected ? " is-selected" : ""}`}
               aria-pressed={r.prefectureCode === selected}
-              aria-label={`${r.prefectureName}　映画館 ${fmtRate(r.cinemaRate)}、映画館以外 ${fmtRate(r.outsideCinemaRate)}`}
+              aria-label={`${prefName(r)}: ${t.ind.cinemaRate} ${fmtRate(r.cinemaRate)}, ${t.ind.outsideCinemaRate} ${fmtRate(r.outsideCinemaRate)}`}
               onClick={() => onSelect(r.prefectureCode)}
             >
-              <span className="bar-name">{r.prefectureName}</span>
+              <span className="bar-name">{prefName(r)}</span>
               <span className="bar-track" aria-hidden="true">
                 {nc != null && <i className="bar-nat" style={{ left: `${nc}%` }} />}
                 {no != null && <i className="bar-nat" style={{ left: `${no}%` }} />}

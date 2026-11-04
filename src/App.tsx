@@ -6,7 +6,9 @@ import { BarCompare } from "./components/BarCompare";
 import { DataTable } from "./components/DataTable";
 import { Modal } from "./components/Modal";
 import { HoverCard, type HoverState } from "./components/HoverCard";
-import { IND_LABEL, IND_SUB, indexBy, loadDataset, NATIONAL, SEX_LABEL, type Dataset, type Indicator, type Sex } from "./lib/data";
+import { indexBy, loadDataset, LoadError, NATIONAL, type Dataset, type Indicator, type Sex } from "./lib/data";
+import { I18nContext, initialLang, makeI18n, useI18n, type Lang } from "./lib/i18n";
+import { AboutEn } from "./components/AboutEn";
 import { buildGeometry, type MapGeometry } from "./lib/geo";
 import { PillarLegend } from "./components/PillarLegend";
 
@@ -23,7 +25,6 @@ function hasWebGL() {
 }
 
 const MAP_W = 520;
-const PERIOD_LABEL = "2021年調査　過去1年間（2020年10月20日〜2021年10月19日）";
 
 export default function App() {
   const [data, setData] = useState<Dataset | null>(null);
@@ -43,12 +44,30 @@ export default function App() {
     setZoomed(true);
   };
   const [dialog, setDialog] = useState<"about" | "table" | null>(null);
+  const [lang, setLang] = useState<Lang>(initialLang);
+  const i18n = useMemo(() => makeI18n(lang), [lang]);
+  const { t } = i18n;
+  const [loadErr, setLoadErr] = useState<LoadError | null>(null);
+
+  // 言語：html の lang・タイトル・URL（共有用）・前回の選択を更新
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    document.title = t.docTitle;
+    try {
+      const u = new URL(window.location.href);
+      u.searchParams.set("lang", lang);
+      window.history.replaceState(null, "", u);
+      window.localStorage.setItem("lang", lang);
+    } catch {
+      /* 保存できない環境では何もしない */
+    }
+  }, [lang, t]);
 
   useEffect(() => {
     Promise.all([
       loadDataset(),
       fetch(`${import.meta.env.BASE_URL}data/japan_pref.topojson`).then((r) => {
-        if (!r.ok) throw new Error(`地図データを読み込めませんでした（HTTP ${r.status}）`);
+        if (!r.ok) throw new LoadError("map", r.status);
         return r.json();
       }),
     ])
@@ -56,7 +75,10 @@ export default function App() {
         setData(d);
         setGeo(buildGeometry(t, MAP_W));
       })
-      .catch((e: Error) => setError(e.message || "データの読み込みに失敗しました"));
+      .catch((e: Error) => {
+        if (e instanceof LoadError) setLoadErr(e);
+        setError(e.message || "error");
+      });
   }, []);
 
   const rows = useMemo(() => (data ? data.records.filter((r) => r.sex === sex) : []), [data, sex]);
@@ -66,39 +88,49 @@ export default function App() {
   const pref = byCode.get(selected);
   const prefList = rows.filter((r) => r.prefectureCode !== NATIONAL).sort((a, b) => a.prefectureCode.localeCompare(b.prefectureCode));
 
+  const errText = loadErr ? (loadErr.kind === "stats" ? t.errStats(loadErr.status) : t.errMap(loadErr.status)) : t.errGeneric;
+
   return (
+    <I18nContext.Provider value={i18n}>
     <div className="app">
       <header className="topbar">
         <div className="brand">
           <p className="kicker">#30DayMapChallenge 2026 · Day 5 Senses: Sight</p>
-          <h1>映画を見る、日本を見る。</h1>
+          <h1>{t.title}</h1>
         </div>
         <p className="lede">
-          映画を見る場所は、地域でどう違う？
-          <strong>過去1年間に映画を見た人の割合。両方で見た人も含みます。</strong>
+          {t.question}
+          <strong>{t.lede}</strong>
         </p>
         {data && geo && (
           <div className="controls">
-            <div className="seg" role="radiogroup" aria-label="性別">
-              {(["total", "male", "female"] as Sex[]).map((s) => (
-                <button key={s} role="radio" aria-checked={sex === s} className={sex === s ? "on" : ""} onClick={() => setSex(s)}>
-                  {SEX_LABEL[s]}
+            <div className="seg seg-lang" role="radiogroup" aria-label={t.langLabel}>
+              {(["en", "ja"] as Lang[]).map((l) => (
+                <button key={l} role="radio" aria-checked={lang === l} className={lang === l ? "on" : ""} onClick={() => setLang(l)} lang={l}>
+                  {l === "en" ? "EN" : "日本語"}
                 </button>
               ))}
             </div>
-            <div className="seg" role="radiogroup" aria-label="表示方法">
-              <button role="radio" aria-checked={view === "3d"} className={view === "3d" ? "on" : ""} onClick={() => setMode("3d")} disabled={!webgl} title={webgl ? undefined : "この環境では立体表示を使えません"}>
-                立体
+            <div className="seg" role="radiogroup" aria-label={t.sexLabel}>
+              {(["total", "male", "female"] as Sex[]).map((s) => (
+                <button key={s} role="radio" aria-checked={sex === s} className={sex === s ? "on" : ""} onClick={() => setSex(s)}>
+                  {t.sex[s]}
+                </button>
+              ))}
+            </div>
+            <div className="seg" role="radiogroup" aria-label={t.viewLabel}>
+              <button role="radio" aria-checked={view === "3d"} className={view === "3d" ? "on" : ""} onClick={() => setMode("3d")} disabled={!webgl} title={webgl ? undefined : t.no3d}>
+                {t.view3d}
               </button>
               <button role="radio" aria-checked={view === "2d"} className={view === "2d" ? "on" : ""} onClick={() => setMode("2d")}>
-                2面で比べる
+                {t.view2d}
               </button>
             </div>
             {view === "2d" && (
-            <div className="seg seg-mobile" role="radiogroup" aria-label="表示する地図（スマートフォン）">
+            <div className="seg seg-mobile" role="radiogroup" aria-label={t.mobileMapLabel}>
               {(["cinemaRate", "outsideCinemaRate"] as Indicator[]).map((k) => (
                 <button key={k} role="radio" aria-checked={mobileInd === k} className={mobileInd === k ? "on" : ""} onClick={() => setMobileInd(k)}>
-                  {IND_LABEL[k]}
+                  {t.ind[k]}
                 </button>
               ))}
             </div>
@@ -109,12 +141,13 @@ export default function App() {
 
       {error && (
         <div className="error" role="alert">
-          {error}。ページを再読み込みしてください。
+          {errText}
+          {t.reload}
         </div>
       )}
       {!error && (!data || !geo) && (
         <p className="loading" role="status">
-          読み込み中…
+          {t.loading}
         </p>
       )}
 
@@ -129,7 +162,7 @@ export default function App() {
                 zoomed={zoomed}
                 onToggle={() => setZoomed((z) => !z)}
               />
-              <Suspense fallback={<p className="loading">立体地図を準備中…</p>}>
+              <Suspense fallback={<p className="loading">{t.loading3d}</p>}>
                 <CinemaStage
                   geo={geo}
                   byCode={byCode}
@@ -155,9 +188,9 @@ export default function App() {
             {(["cinemaRate", "outsideCinemaRate"] as Indicator[]).map((k) => (
               <figure key={k} className={`screen${mobileInd === k ? " mobile-on" : ""}`}>
                 <figcaption>
-                  <span className="screen-title">{IND_LABEL[k]}</span>
-                  <span className="screen-sub">{IND_SUB[k]}</span>
-                  <span className="screen-nat">全国 {nation?.[k]?.toFixed(1)}%</span>
+                  <span className="screen-title">{t.ind[k]}</span>
+                  <span className="screen-sub">{t.indSub[k]}</span>
+                  <span className="screen-nat">{t.national} {nation?.[k]?.toFixed(1)}%</span>
                 </figcaption>
                 <div className="map-box">
                   <ChoroplethMap
@@ -178,14 +211,14 @@ export default function App() {
           )}
 
           <aside className="side">
-            <TicketCard pref={pref} nation={nation} sex={sex} period={PERIOD_LABEL} />
+            <TicketCard pref={pref} nation={nation} sex={sex} />
             {view === "3d" ? (
               <PillarLegend nation={nation} />
             ) : (
               <Legend
                 markers={[
-                  { label: "映画館", value: nation?.cinemaRate ?? null },
-                  { label: "映画館以外", value: nation?.outsideCinemaRate ?? null },
+                  { label: t.ind.cinemaRate, value: nation?.cinemaRate ?? null },
+                  { label: t.ind.outsideCinemaRate, value: nation?.outsideCinemaRate ?? null },
                 ]}
               />
             )}
@@ -197,12 +230,12 @@ export default function App() {
 
       <footer className="foot">
         <p className="foot-source">
-          出典：総務省統計局「令和3年社会生活基本調査」第93-2表を加工　地図：地球地図日本（国土地理院）
+          {t.footSource}
         </p>
         <div className="foot-actions">
-          <button onClick={() => setDialog("about")}>データについて</button>
+          <button onClick={() => setDialog("about")}>{t.about}</button>
           <button onClick={() => setDialog("table")} disabled={!data}>
-            数値表
+            {t.table}
           </button>
           <a href="https://github.com/shinyanakashima/30daymapchallenge-2026day5-senses-cinema" target="_blank" rel="noreferrer">
             GitHub
@@ -210,7 +243,8 @@ export default function App() {
         </div>
       </footer>
 
-      <Modal open={dialog === "about"} title="このデータについて" onClose={() => setDialog(null)}>
+      <Modal open={dialog === "about"} title={t.aboutTitle} onClose={() => setDialog(null)}>
+        {lang === "en" ? <AboutEn data={data} /> : (
         <div className="about">
           <p>
             総務省『2021年社会生活基本調査』をもとに、10歳以上の人が過去1年間（2020年10月20日〜2021年10月19日）に映画を鑑賞した割合を表示しています。映画館と映画館以外の両方で見た人も含まれます。コロナ禍を含む期間の結果であり、現在の視聴状況や個人の好みを直接示すものではありません。
@@ -242,11 +276,13 @@ export default function App() {
             </dd>
           </dl>
         </div>
+        )}
       </Modal>
-      <Modal open={dialog === "table"} title={`数値表（${SEX_LABEL[sex]}）`} onClose={() => setDialog(null)}>
+      <Modal open={dialog === "table"} title={t.tableTitle(t.sex[sex])} onClose={() => setDialog(null)}>
         {data && <DataTable rows={rows} nation={nation} sex={sex} />}
       </Modal>
     </div>
+    </I18nContext.Provider>
   );
 }
 
@@ -264,30 +300,31 @@ function MapDock({
   zoomed: boolean;
   onToggle: () => void;
 }) {
+  const { t, prefName } = useI18n();
   const i = prefList.findIndex((r) => r.prefectureCode === selected);
   const step = (d: number) => onSelect(prefList[(i + d + prefList.length) % prefList.length].prefectureCode);
   return (
     <div className="map-dock">
       <div className="pref-picker">
-        <button onClick={() => step(-1)} aria-label="前の都道府県">
+        <button onClick={() => step(-1)} aria-label={t.prevPref}>
           ‹
         </button>
         <label>
-          <span className="sr-only">都道府県</span>
+          <span className="sr-only">{t.prefecture}</span>
           <select value={selected} onChange={(e) => onSelect(e.target.value)}>
             {prefList.map((r) => (
               <option key={r.prefectureCode} value={r.prefectureCode}>
-                {r.prefectureCode} {r.prefectureName}
+                {r.prefectureCode} {prefName(r)}
               </option>
             ))}
           </select>
         </label>
-        <button onClick={() => step(1)} aria-label="次の都道府県">
+        <button onClick={() => step(1)} aria-label={t.nextPref}>
           ›
         </button>
       </div>
       <button className="dock-zoom" onClick={onToggle} aria-pressed={zoomed}>
-        {zoomed ? "全国を見る" : "選択県に寄る"}
+        {zoomed ? t.zoomOut : t.zoomIn}
       </button>
     </div>
   );

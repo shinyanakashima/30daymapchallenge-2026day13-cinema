@@ -1,13 +1,15 @@
 import { GRADIENT_STOPS } from "../lib/data";
+import { useI18n } from "../lib/i18n";
 
 type Marker = { label: string; value: number | null };
 
 // 両地図共通の固定尺度 0〜100%
 export function Legend({ markers }: { markers: Marker[] }) {
+  const { t } = useI18n();
   const ticks = [0, 20, 40, 60, 80, 100];
   return (
-    <figure className="legend" aria-label="凡例：行動者率 0〜100% の共通尺度（両地図共通）">
-      <figcaption>行動者率（%）　両地図共通・0〜100%の固定尺度</figcaption>
+    <figure className="legend" aria-label={t.gradAria}>
+      <figcaption>{t.gradCaption}</figcaption>
       <svg viewBox="0 0 400 46" preserveAspectRatio="none" aria-hidden="true">
         <defs>
           <linearGradient id="legend-grad" x1="0" x2="1">
@@ -30,21 +32,20 @@ export function Legend({ markers }: { markers: Marker[] }) {
         ))}
       </svg>
       <div className="legend-ticks" aria-hidden="true">
-        {ticks.map((t) => (
-          <span key={t} style={{ left: `${t}%` }}>
-            {t}
+        {ticks.map((v) => (
+          <span key={v} style={{ left: `${v}%` }}>
+            {v}
           </span>
         ))}
       </div>
       <p className="legend-note">
-        縦線：全国値（
+        {t.gradNote}
         {markers.map((m, i) => (
           <span key={m.label}>
-            {i > 0 && "／"}
+            {i > 0 && " / "}
             {m.label} {m.value?.toFixed(1)}%
           </span>
         ))}
-        ）
       </p>
     </figure>
   );

@@ -5,7 +5,8 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import type { MapGeometry } from "../lib/geo";
-import { fmtRate, IND_COLOR, IND_LABEL, type Indicator, type Rec } from "../lib/data";
+import { fmtRate, IND_COLOR, type Indicator, type Rec } from "../lib/data";
+import { useI18n } from "../lib/i18n";
 import type { HoverState } from "./HoverCard";
 
 type Props = {
@@ -69,6 +70,7 @@ type Ctx = {
 const toWorld = (geo: MapGeometry, [x, y]: [number, number]) => new THREE.Vector2(x - geo.width / 2, geo.height / 2 - y);
 
 export function CinemaStage({ geo, byCode, nation, selected, onSelect, zoomed, onReset, onHover, onFail }: Props) {
+  const { t, prefName } = useI18n();
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const labelRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -389,23 +391,23 @@ export function CinemaStage({ geo, byCode, nation, selected, onSelect, zoomed, o
       className="stage3d"
       tabIndex={0}
       role="application"
-      aria-roledescription="立体地図"
-      aria-label={`都道府県ごとに、映画館（金色）と映画館以外（青色）の行動者率を柱の高さで示した立体地図。矢印キーで都道府県を選択、Escで全国表示。選択中：${sel?.prefectureName ?? ""} 映画館 ${fmtRate(sel?.cinemaRate ?? null)}、映画館以外 ${fmtRate(sel?.outsideCinemaRate ?? null)}`}
+      aria-roledescription={t.stageRole}
+      aria-label={t.stageAria(prefName(sel), fmtRate(sel?.cinemaRate ?? null), fmtRate(sel?.outsideCinemaRate ?? null))}
       onKeyDown={onKey}
     >
       <canvas ref={canvasRef} />
       <div className="stage3d-labels" aria-hidden="true">
         <div ref={(el) => (labelRefs.current.name = el)} className="s3-name">
-          {sel?.prefectureName}
+          {prefName(sel)}
         </div>
         {INDS.map((k) => (
           <div key={k} ref={(el) => (labelRefs.current[k] = el)} className={`s3-val s3-${k}`}>
-            <span>{IND_LABEL[k]}</span> {fmtRate(sel?.[k] ?? null)}
+            <span>{t.ind[k]}</span> {fmtRate(sel?.[k] ?? null)}
           </div>
         ))}
         <div ref={(el) => (labelRefs.current.r100 = el)} className="s3-tick">100%</div>
       </div>
-      <p className="stage3d-note">柱の高さ＝行動者率（0〜100%、2本とも同じ尺度）　輪＝全国値　沖縄県は左上の枠内に移動して表示</p>
+      <p className="stage3d-note">{t.stageNote}</p>
     </div>
   );
 }

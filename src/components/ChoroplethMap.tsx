@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import type { MapGeometry } from "../lib/geo";
-import { fmtRate, IND_LABEL, rateColor, type Indicator, type Rec } from "../lib/data";
+import { fmtRate, rateColor, type Indicator, type Rec } from "../lib/data";
+import { useI18n } from "../lib/i18n";
 
 type Props = {
   geo: MapGeometry;
@@ -34,7 +35,8 @@ function targetViewBox(geo: MapGeometry, code: string, zoomed: boolean): VB {
 
 export function ChoroplethMap({ geo, indicator, byCode, selected, onSelect, zoomed, onReset, hovered, onHover }: Props) {
   const sel = geo.shapes.find((s) => s.code === selected);
-  const label = IND_LABEL[indicator];
+  const { t, prefName } = useI18n();
+  const label = t.ind[indicator];
   const hatch = `hatch-${indicator}`;
   const glow = `glow-${indicator}`;
 
@@ -116,8 +118,8 @@ export function ChoroplethMap({ geo, indicator, byCode, selected, onSelect, zoom
         className="map-svg"
         viewBox={vb.map((v) => v.toFixed(2)).join(" ")}
         role="application"
-        aria-roledescription="地図"
-        aria-label={`${label}の都道府県別行動者率の地図。矢印キーで都道府県を選択、Escで全国表示。選択中：${selRec?.prefectureName ?? ""} ${fmtRate(selV)}`}
+        aria-roledescription={t.mapRole}
+        aria-label={t.mapAria(label, prefName(selRec), fmtRate(selV))}
         tabIndex={0}
         onKeyDown={onKey}
         onPointerLeave={() => onHover(null)}
@@ -144,7 +146,7 @@ export function ChoroplethMap({ geo, indicator, byCode, selected, onSelect, zoom
         <g className={zoomed && selected !== "47" ? "is-zoomed-away" : ""}>
         <rect x={ib.x} y={ib.y} width={ib.w} height={ib.h} className="inset-box" />
         <text x={ib.x + 4} y={ib.y + ib.h + 12} className="inset-label">
-          沖縄県（位置を移動）
+          {t.okinawaInset}
         </text>
         </g>
         <g className={zoomed ? "prefs is-dim" : "prefs"}>
@@ -181,7 +183,7 @@ export function ChoroplethMap({ geo, indicator, byCode, selected, onSelect, zoom
     {/* 県名ラベルは傾けた面の外にHTMLで重ね、文字がにじまないようにする */}
     {zoomed && labelPos && sel && (
       <div className="pref-label" style={{ left: labelPos.x, top: labelPos.y }} aria-hidden="true">
-        {sel.name} <b>{fmtRate(selV)}</b>
+        {prefName({ prefectureCode: sel.code, prefectureName: sel.name })} <b>{fmtRate(selV)}</b>
       </div>
     )}
     </>
