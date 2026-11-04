@@ -1,0 +1,129 @@
+{
+  "generatedBy": "scripts/build-data.mjs",
+  "source": {
+    "surveyName": "令和3年社会生活基本調査",
+    "publisher": "総務省統計局",
+    "questionnaire": "調査票A",
+    "section": "生活行動編（地域）／趣味・娯楽",
+    "tableNumber": "第93-2表",
+    "tableTitle": "男女,趣味・娯楽の種類別行動者率(10歳以上)－全国，都道府県",
+    "publishedDate": "2022-08-31",
+    "statInfId": "000032223421",
+    "dbStatsDataId": "0003456573",
+    "pageUrl": "https://www.e-stat.go.jp/stat-search/files?stat_infid=000032223421",
+    "fileUrl": "https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032223421&fileKind=0",
+    "dbViewUrl": "https://www.e-stat.go.jp/dbview?sid=0003456573",
+    "retrievedAt": "2026-11-04",
+    "terms": "政府統計の総合窓口（e-Stat）利用規約に基づく。政府標準利用規約（第2.0版）準拠、CC BY 4.0 互換。出典を明記して利用・加工可。https://www.e-stat.go.jp/terms-of-use"
+  },
+  "period": {
+    "referenceDate": "2021-10-20",
+    "from": "2020-10-20",
+    "to": "2021-10-19",
+    "population": "10歳以上",
+    "definition": "行動者率＝属性の人口に占める、過去1年間に該当する活動をした人の割合（％）。両項目は排他的ではない（両方で鑑賞した人を含む）。"
+  },
+  "sourceFile": {
+    "path": "data/raw/r3_shakai_A_table93-2_000032223421.xlsx",
+    "sha256": "74749c476b7216c2f98412a6eebd7ab76083ad391bfe50d1ff9ab071058820b0",
+    "sheet": "a093_2"
+  },
+  "columnMapping": {
+    "headerRow": 7,
+    "unitRow": 8,
+    "firstDataRow": 10,
+    "sex": "A",
+    "region": "B",
+    "district": "C",
+    "estimatedPopulationThousands": "D",
+    "cinemaRate": "I (04_映画館での映画鑑賞)",
+    "outsideCinemaRate": "J (05_映画館以外での映画鑑賞（テレビ・DVD・パソコンなど）)",
+    "sampleSize": "AO"
+  },
+  "codes": {
+    "sex": {
+      "0_総数": "total",
+      "1_男": "male",
+      "2_女": "female"
+    },
+    "district": {
+      "0_総数": "total",
+      "1_人口集中地区": "did",
+      "2_人口集中地区以外": "non_did"
+    }
+  },
+  "recordCounts": {
+    "all": 432,
+    "districtTotal": 144,
+    "missingValues": 0
+  },
+  "boundary": {
+    "path": "public/data/japan_pref.topojson",
+    "sha256": "0d24a888418516f99537f0ddcbd020c0e83b367726d0576c78460f00db4f1a60",
+    "origin": "dataofjapan/land japan.geojson（地球地図日本〔国土地理院〕のShapefileを変換）を mapshaper で簡素化し TopoJSON 化",
+    "originUrl": "https://github.com/dataofjapan/land",
+    "attribution": "地球地図日本（国土地理院） https://www.gsi.go.jp/kankyochiri/gm_jpn.html",
+    "terms": "配布元に準ずる。非営利目的は出典（地球地図日本）の明記。営利目的は出典明記に加え著作権者への利用報告。",
+    "featureCount": 47,
+    "joinKey": "properties.id（都道府県コード 1〜47 を2桁化）",
+    "codes": [
+      "01",
+      "02",
+      "03",
+      "04",
+      "05",
+      "06",
+      "07",
+      "08",
+      "09",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16",
+      "17",
+      "18",
+      "19",
+      "20",
+      "21",
+      "22",
+      "23",
+      "24",
+      "25",
+      "26",
+      "27",
+      "28",
+      "29",
+      "30",
+      "31",
+      "32",
+      "33",
+      "34",
+      "35",
+      "36",
+      "37",
+      "38",
+      "39",
+      "40",
+      "41",
+      "42",
+      "43",
+      "44",
+      "45",
+      "46",
+      "47"
+    ]
+  },
+  "outputs": [
+    {
+      "path": "public/data/cinema_2021.json",
+      "sha256": "f5af3532f337fc1d8036f2e2f20eecbdb56723b6cb4c0a6af1404bd8b05bd97d"
+    },
+    {
+      "path": "data/processed/cinema_2021.csv",
+      "sha256": "a432a15f71ec68c056b8d12c00da74e5890f34d0e107c8ce0a1a43c083562fb6"
+    }
+  ]
+}
