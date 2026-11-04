@@ -63,6 +63,30 @@ export function ChoroplethMap({ geo, indicator, byCode, selected, onSelect, zoom
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
+  // 傾けた地図上の県の位置（画面座標）を追跡して、HTMLラベルを置く
+  const planeRef = useRef<HTMLDivElement>(null);
+  const anchorRef = useRef<SVGCircleElement>(null);
+  const [labelPos, setLabelPos] = useState<{ x: number; y: number } | null>(null);
+  useEffect(() => {
+    const measure = () => {
+      const a = anchorRef.current?.getBoundingClientRect();
+      const box = planeRef.current?.parentElement?.getBoundingClientRect();
+      if (a && box) setLabelPos({ x: a.left + a.width / 2 - box.left, y: a.top - box.top });
+    };
+    let raf = 0;
+    const t0 = performance.now();
+    const loop = (now: number) => {
+      measure();
+      if (now - t0 < DURATION + 250) raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    window.addEventListener("resize", measure);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", measure);
+    };
+  }, [key, zoomed, selected]);
+
   // 地図は1つのタブ停止。←→↑↓ で都道府県コード順に選択を移動、Esc で全国表示へ
   const onKey = (e: KeyboardEvent<SVGSVGElement>) => {
     const n = Number(selected);
@@ -86,7 +110,8 @@ export function ChoroplethMap({ geo, indicator, byCode, selected, onSelect, zoom
   const selV = selRec ? selRec[indicator] : null;
   const zoomScale = geo.width / vb[2]; // 文字・光彩をズーム率で補正
   return (
-    <div className={`map-plane${zoomed ? " is-tilted" : ""}`}>
+    <>
+    <div ref={planeRef} className={`map-plane${zoomed ? " is-tilted" : ""}`}>
       <svg
         className="map-svg"
         viewBox={vb.map((v) => v.toFixed(2)).join(" ")}
@@ -142,19 +167,23 @@ export function ChoroplethMap({ geo, indicator, byCode, selected, onSelect, zoom
           <g className="pref-selected" aria-hidden="true">
             <path d={sel.d} fill={selV == null ? `url(#${hatch})` : rateColor(selV)} filter={`url(#${glow})`} />
             <path d={sel.d} className="pref-selected-line" />
-            {zoomed && (
-              <text
-                className="pref-label"
-                x={sel.bbox.x + sel.bbox.w / 2}
-                y={sel.bbox.y - 8 / zoomScale}
-                style={{ fontSize: 15 / zoomScale, strokeWidth: 4 / zoomScale }}
-              >
-                {sel.name} {fmtRate(selV)}
-              </text>
-            )}
+            <circle
+              ref={anchorRef}
+              cx={sel.bbox.x + sel.bbox.w / 2}
+              cy={sel.bbox.y}
+              r={0.01}
+              fill="none"
+            />
           </g>
         )}
       </svg>
     </div>
+    {/* 県名ラベルは傾けた面の外にHTMLで重ね、文字がにじまないようにする */}
+    {zoomed && labelPos && sel && (
+      <div className="pref-label" style={{ left: labelPos.x, top: labelPos.y }} aria-hidden="true">
+        {sel.name} <b>{fmtRate(selV)}</b>
+      </div>
+    )}
+    </>
   );
 }

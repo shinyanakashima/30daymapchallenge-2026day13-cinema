@@ -89,7 +89,15 @@ h1, h2 { margin: 0; }
 .prefs.is-dim .pref.is-hover { opacity: 0.85; }
 .pref-selected { pointer-events: none; }
 .pref-selected-line { fill: none; stroke: #fff1c9; stroke-width: 1.6; vector-effect: non-scaling-stroke; }
-.pref-label { fill: #fff6df; stroke: #08070a; paint-order: stroke; text-anchor: middle; font-weight: 700; }
+.pref-label {
+  position: absolute; z-index: 2; pointer-events: none; transform: translate(-50%, calc(-100% - 10px));
+  padding: 3px 10px; border-radius: 999px; white-space: nowrap;
+  background: #0b090dd9; border: 1px solid #e8b85c99; color: #fff6df;
+  font-size: 14px; font-weight: 700; letter-spacing: 0.04em; line-height: 1.4;
+  box-shadow: 0 0 18px -4px #ffb34799; animation: label-in 0.4s ease-out;
+}
+.pref-label b { color: var(--accent); margin-left: 4px; font-variant-numeric: tabular-nums; }
+@keyframes label-in { from { opacity: 0; } to { opacity: 1; } }
 .inset-box { fill: none; stroke: #4a4350; stroke-width: 1; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
 .inset-label { font-size: 11px; fill: #8a8490; }
 .inset-box, .inset-label { transition: opacity 0.5s; }
