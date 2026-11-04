@@ -1,6 +1,7 @@
 import { feature } from "topojson-client";
 
-export type PrefShape = { code: string; name: string; d: string; inset: boolean };
+export type BBox = { x: number; y: number; w: number; h: number };
+export type PrefShape = { code: string; name: string; d: string; inset: boolean; bbox: BBox };
 export type MapGeometry = { width: number; height: number; shapes: PrefShape[]; insetBox: { x: number; y: number; w: number; h: number } };
 
 type Topo = { type: "Topology"; objects: Record<string, unknown>; arcs: number[][][] };
@@ -69,6 +70,7 @@ export function buildGeometry(topo: Topo, width: number): MapGeometry {
     code: it.code,
     name: it.name,
     inset: it.inset,
+    bbox: bboxOf(it.polys.flat().map(([x, y]) => [tx(x), ty(y)] as [number, number])),
     d: it.polys.map((r) => "M" + r.map(([x, y]) => `${tx(x).toFixed(1)},${ty(y).toFixed(1)}`).join("L") + "Z").join(""),
   }));
   shapes.sort((a, b) => a.code.localeCompare(b.code));
@@ -76,4 +78,13 @@ export function buildGeometry(topo: Topo, width: number): MapGeometry {
   const m = 6;
   const insetBox = { x: tx(iMinX) - m, y: ty(iMaxY) - m, w: (iMaxX - iMinX) * s + m * 2, h: (iMaxY - iMinY) * s + m * 2 };
   return { width, height, shapes, insetBox };
+}
+
+function bboxOf(pts: [number, number][]): BBox {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const [x, y] of pts) {
+    x0 = Math.min(x0, x); x1 = Math.max(x1, x);
+    y0 = Math.min(y0, y); y1 = Math.max(y1, y);
+  }
+  return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
 }

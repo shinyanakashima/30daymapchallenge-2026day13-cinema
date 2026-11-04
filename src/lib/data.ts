@@ -59,8 +59,8 @@ const STOPS: [number, [number, number, number]][] = [
   [80, [128, 36, 72]],
   [100, [56, 16, 52]],
 ];
-export function rateColor(v: number | null): string {
-  if (v == null) return "url(#hatch)";
+export function rateColor(v: number | null, missing = "#6b6470"): string {
+  if (v == null) return missing;
   const x = Math.max(0, Math.min(100, v));
   for (let i = 1; i < STOPS.length; i++) {
     const [x1, c1] = STOPS[i];

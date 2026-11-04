@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { fmtRate, NATIONAL, rateColor, type Rec } from "../lib/data";
 
 type SortKey = "code" | "cinemaRate" | "outsideCinemaRate";
@@ -13,13 +13,25 @@ export function BarCompare({ rows, nation, selected, onSelect }: Props) {
     return [...prefs].sort((a, b) => (b[sort] ?? -1) - (a[sort] ?? -1) || a.prefectureCode.localeCompare(b.prefectureCode));
   }, [rows, sort]);
 
+  // 選択県が変わったら、リストが内部スクロールしている場合のみ該当行を見える位置へ（ページ自体は動かさない）
+  const listRef = useRef<HTMLOListElement>(null);
+  useEffect(() => {
+    const ol = listRef.current;
+    if (!ol || ol.scrollHeight <= ol.clientHeight + 1) return;
+    const li = ol.querySelector<HTMLElement>(".is-selected")?.parentElement;
+    if (!li) return;
+    const top = li.offsetTop - ol.offsetTop;
+    if (top < ol.scrollTop || top + li.offsetHeight > ol.scrollTop + ol.clientHeight)
+      ol.scrollTo({ top: top - ol.clientHeight / 2 + li.offsetHeight / 2, behavior: "smooth" });
+  }, [selected, sort]);
+
   const nc = nation?.cinemaRate ?? null;
   const no = nation?.outsideCinemaRate ?? null;
 
   return (
     <section className="bars" aria-labelledby="bars-title">
       <div className="bars-head">
-        <h2 id="bars-title">47都道府県を並べて見る</h2>
+        <h2 id="bars-title">47都道府県</h2>
         <div className="seg seg-small" role="radiogroup" aria-label="並び順（率順は高い順）">
           {(
             [
@@ -35,7 +47,7 @@ export function BarCompare({ rows, nation, selected, onSelect }: Props) {
         </div>
       </div>
       <p className="bars-note">
-        各県の2本の棒はそれぞれ独立した割合です（足して100%になるものではありません）。上の棒＝映画館、下の棒＝映画館以外。点線は全国値。行を押すと地図とカードの選択県が変わります。
+        上＝映画館、下＝映画館以外。2本はそれぞれ独立した割合で、足して100%にはなりません。点線は全国値。
       </p>
       <div className="bars-axis" aria-hidden="true">
         <span />
@@ -47,7 +59,7 @@ export function BarCompare({ rows, nation, selected, onSelect }: Props) {
           ))}
         </div>
       </div>
-      <ol className="bars-list">
+      <ol className="bars-list" ref={listRef}>
         {sorted.map((r) => (
           <li key={r.prefectureCode}>
             <button

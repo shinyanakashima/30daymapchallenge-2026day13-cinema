@@ -4,8 +4,7 @@ import { diffPt, fmtPt, fmtRate, NATIONAL, SEX_LABEL, type Rec, type Sex } from 
 export function DataTable({ rows, nation, sex }: { rows: Rec[]; nation: Rec | undefined; sex: Sex }) {
   const prefs = rows.filter((r) => r.prefectureCode !== NATIONAL).sort((a, b) => a.prefectureCode.localeCompare(b.prefectureCode));
   return (
-    <details className="table-wrap">
-      <summary>数値表を開く（{SEX_LABEL[sex]}、47都道府県＋全国）</summary>
+    <div className="table-wrap">
       <div className="table-scroll">
         <table>
           <caption>
@@ -49,6 +48,6 @@ export function DataTable({ rows, nation, sex }: { rows: Rec[]; nation: Rec | un
         </table>
       </div>
       <p className="table-note">サンプルサイズは調査の回答者数で、映画を見た人の数ではありません。</p>
-    </details>
+    </div>
   );
 }
