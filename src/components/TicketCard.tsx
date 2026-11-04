@@ -1,4 +1,4 @@
-import { diffPt, fmtPt, fmtRate, IND_LABEL, IND_SUB, SEX_LABEL, type Indicator, type Rec, type Sex } from "../lib/data";
+import { IND_COLOR, diffPt, fmtPt, fmtRate, IND_LABEL, IND_SUB, SEX_LABEL, type Indicator, type Rec, type Sex } from "../lib/data";
 
 type Props = { pref: Rec | undefined; nation: Rec | undefined; sex: Sex; period: string };
 
@@ -19,6 +19,7 @@ export function TicketCard({ pref, nation, sex, period }: Props) {
           return (
             <div className="stub" key={k}>
               <p className="stub-label">
+                <i className="swatch" style={{ background: IND_COLOR[k] }} aria-hidden="true" />
                 {IND_LABEL[k]}
                 <span className="stub-sub">{IND_SUB[k]}</span>
               </p>

@@ -26,6 +26,8 @@ export const IND_SUB: Record<Indicator, string> = {
   outsideCinemaRate: "映画館以外での映画鑑賞（テレビ・DVD・パソコンなど）",
 };
 export const NATIONAL = "00";
+// 柱・棒の指標色（暗い背景上で区別しやすい暖色／寒色）
+export const IND_COLOR: Record<Indicator, string> = { cinemaRate: "#f2b84b", outsideCinemaRate: "#7fb0ff" };
 
 export async function loadDataset(): Promise<Dataset> {
   const res = await fetch(`${import.meta.env.BASE_URL}data/cinema_2021.json`);

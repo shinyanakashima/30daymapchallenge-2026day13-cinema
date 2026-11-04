@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { fmtRate, NATIONAL, rateColor, type Rec } from "../lib/data";
+import { fmtRate, NATIONAL, IND_COLOR, type Rec } from "../lib/data";
 
 type SortKey = "code" | "cinemaRate" | "outsideCinemaRate";
 type Props = { rows: Rec[]; nation: Rec | undefined; selected: string; onSelect: (code: string) => void };
@@ -72,10 +72,10 @@ export function BarCompare({ rows, nation, selected, onSelect }: Props) {
               <span className="bar-track" aria-hidden="true">
                 {nc != null && <i className="bar-nat" style={{ left: `${nc}%` }} />}
                 {no != null && <i className="bar-nat" style={{ left: `${no}%` }} />}
-                <span className="bar bar-cinema" style={{ width: `${r.cinemaRate ?? 0}%`, background: rateColor(r.cinemaRate) }}>
+                <span className="bar bar-cinema" style={{ width: `${r.cinemaRate ?? 0}%`, background: IND_COLOR.cinemaRate }}>
                   <em>{fmtRate(r.cinemaRate)}</em>
                 </span>
-                <span className="bar bar-outside" style={{ width: `${r.outsideCinemaRate ?? 0}%`, background: rateColor(r.outsideCinemaRate) }}>
+                <span className="bar bar-outside" style={{ width: `${r.outsideCinemaRate ?? 0}%`, background: IND_COLOR.outsideCinemaRate }}>
                   <em>{fmtRate(r.outsideCinemaRate)}</em>
                 </span>
               </span>

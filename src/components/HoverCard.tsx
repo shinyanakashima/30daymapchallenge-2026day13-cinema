@@ -1,4 +1,4 @@
-import { diffPt, fmtPt, IND_LABEL, rateColor, type Indicator, type Rec } from "../lib/data";
+import { diffPt, fmtPt, IND_LABEL, IND_COLOR, type Indicator, type Rec } from "../lib/data";
 
 export type HoverState = { code: string; x: number; y: number } | null;
 type Props = { hover: HoverState; byCode: Map<string, Rec>; nation: Rec | undefined };
@@ -26,7 +26,7 @@ export function HoverCard({ hover, byCode, nation }: Props) {
           <div className="hc-row" key={k}>
             <span className="hc-label">{IND_LABEL[k]}</span>
             <span className="hc-track">
-              <span className="hc-bar" style={{ width: `${v ?? 0}%`, background: rateColor(v) }} />
+              <span className="hc-bar" style={{ width: `${v ?? 0}%`, background: IND_COLOR[k] }} />
               {n != null && <i className="hc-nat" style={{ left: `${n}%` }} />}
             </span>
             <span className="hc-val">{v == null ? "—" : v.toFixed(1)}%</span>
